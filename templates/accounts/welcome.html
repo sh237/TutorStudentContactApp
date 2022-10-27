@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ja" dir="ltr">
+
+<head>
+<meta charset="utf-8">
+<title></title>
+<link rel="stylesheet" href='{% static "accounts/register.css" %}'/>
+</head>
+
+<body>
+    <a href="{% url 'accounts:login'%}">ログイン</a>
+    <a href="{% url 'accounts:register'%}">登録</a>
+
+</body>
+</html>

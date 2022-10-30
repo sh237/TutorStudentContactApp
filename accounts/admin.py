@@ -9,7 +9,7 @@ class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
-    list_display = ('email', 'is_admin','username','is_teacher')
+    list_display = ('email', 'id','is_admin','username','is_teacher')
     list_filter = ('is_admin',)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),

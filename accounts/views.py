@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from app.models import Calendar
 
 class Welcome(TemplateView):
     template_name = "accounts/welcome.html"
@@ -67,7 +68,11 @@ def Login(request):
                 if user.is_teacher:
                     return HttpResponseRedirect(reverse('app:tutor_home'))
                 else:
-                    return HttpResponseRedirect(reverse('app:student_home'))
+                    if Calendar.objects.filter(student=user).exists():
+                        tutor =  Calendar.objects.filter(student=user)[0].tutor
+                        return HttpResponseRedirect(reverse('app:student_calendar',args=[tutor.id]))
+                    else:
+                        return HttpResponseRedirect(reverse('app:student_home'))
             else:
                 # アカウント利用不可
                 return HttpResponse("アカウントが有効ではありません")

@@ -1,6 +1,6 @@
 from calendar import calendar
 from django.db import models
-
+from accounts.models import User
 
 
 class Calendar(models.Model):
@@ -36,13 +36,26 @@ class CalendarEvent(models.Model):
     calendar = models.ForeignKey('Calendar', on_delete=models.CASCADE)
     start = models.DateTimeField()
     end = models.DateTimeField()
+    color = models.CharField(max_length=40, default='rgb(24,118,210)')
     title = models.CharField(max_length=40)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
     class Meta:
         db_table = 'calendar_event'
 
+class Application(models.Model):
+    id = models.AutoField(primary_key=True)
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='application_student')
+    tutor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='application_tutor')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.student.username + " " + self.tutor.username
+
+    class Meta:
+        db_table = 'application'

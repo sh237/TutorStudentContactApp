@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+
+    <title>{% block title %}{% endblock %}</title>
+    {% block extra_head %}{% endblock %}
+    <header>
+    <h1>
+            {% if user.is_teacher %}
+                <a href="{% url 'app:tutor_home' %}">先生生徒連絡アプリ</a>
+            {% else %} 
+                {% if is_display %}
+                    <a href="{% url 'app:student_calendar' tutor.id %}">先生生徒連絡アプリ</a>
+                {% else %}
+                    <a href="{% url 'app:student_home' %}">先生生徒連絡アプリ</a>
+                {% endif %}
+            {% endif %}
+
+    </h1>
+    <nav class="pc-nav">
+        <ul>
+            <li>{% if user.is_teacher %}
+                <p class="{{user.id}}" id="{{student.id}}">先生名:{{user.username}}</p> 
+              {% else%}
+                <p class="{{user.id}}" id="{{tutor.id}}">生徒名:{{user.username}}</p>
+              {% endif %}</li>
+            <li><a href="{% url 'app:setting' %}">設定</a></li>
+            <li><a id="check" >ユーザ情報</a></li>
+            <li><a href="{% url 'accounts:logout' %}">ログアウト</a></li>
+            <!-- <li><a href="#">---</a></li> -->
+        </ul>
+    </nav>
+</header>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        /* body {
+        margin: 0;
+        padding: 0;
+        font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", メイリオ, Meiryo, "ＭＳ Ｐゴシック", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        background-color: #e6e6e6;
+        } */
+        header {
+        padding: 30px 4% 10px;
+        position: fixed;
+        top: 0;
+        right:0%;
+        width: 100%;
+        background-color: rgb(212, 212, 212);
+        display: flex;
+        align-items: center;
+        }
+        h1 {
+        margin: 0; padding: 0;
+        font-size: 20px;
+        }
+        a {	
+        text-decoration: none;
+        color: #4b4b4b;
+        }
+        nav {
+        margin: 0 0 0 auto;
+        }
+        ul {
+        list-style: none;
+        margin: 0;
+        display: flex;
+        }
+        li {
+        margin: 0 0 0 15px;
+        font-size: 14px;
+        }
+        #check{
+            color:#4b4b4b;
+        }
+        </style>
+  </head>
+    {% block content %}{% endblock %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;       
+        }
+
+        var csrftoken = getCookie('csrftoken');
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+                $(document).ready(function() {
+                    $("#check").on('click', function(){
+                    Swal.fire({
+                        title: 'ユーザー情報',
+                        html: `<p>ユーザー名:{{user.username}}</p>
+                                <p>氏名:{{user.last_name}} {{user.first_name}}</p>
+                                <p>メールアドレス:{{user.email}}</p>
+                        `,
+                        confirmButtonText: '閉じる',
+                        type: 'confirm',
+                        });
+                    });
+                });
+    </script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</html>

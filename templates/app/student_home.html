@@ -1,0 +1,133 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}カレンダー{% endblock %}
+{% block extra_head %}
+{% load django_bootstrap5 %}
+<!-- {% bootstrap_css %} -->
+  <meta charset='utf-8' />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+{% endblock %}
+{% block content %}
+<body style="padding:30px;padding-top:7%;">
+  {% if user.is_teacher %}
+    <h1>先生名:{{user.username}}</h1>
+  {% else%}
+    <h1>生徒名:{{user.username}}</h1>
+  {% endif %}
+  <div class="container">
+    <h2>先生のIDを入力してください</h2>
+    <form id="ajax-search" action="{% url 'app:ajax_search_tutor' %}" method="POST">
+        {% csrf_token %}
+        <input type="text" id="id" required>
+        <button type="submit" >検索</button>
+    </form>
+
+    <div class="result">
+    </div>
+    <div class="requested">
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;       
+        }
+
+        var csrftoken = getCookie('csrftoken');
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        $('#ajax-search').on('submit', function(e) {
+            e.preventDefault();
+
+            $.ajax({
+                'url': '{% url "app:ajax_search_tutor" %}',
+                'type': 'POST',
+                'data': {
+                    'id': $('#id').val(),
+                },
+                'dataType': 'json'
+            })
+            .done(function(response){
+                $('.result').empty();
+                $('.result').prepend('<h2検索結果</h2>');
+                if (response['tutor_name'] != null){
+                    $('.result').append(`<button id='${response.tutor_id}'>先生名: ${response.tutor_name} </button>`);
+                } else {
+                    $('.result').append('<p>先生が見つかりませんでした</p>');
+                }
+            });
+        });
+        $('.result').on('click', 'button', function(e) {
+            var id_ = $('.result').children('button').attr('id');
+            console.log($('.result').attr('class'));
+            console.log(id_);
+            $.ajax({
+                'url': "{% url 'app:application' 1 %}".replace(/1/,id_),
+                'type': 'POST',
+                'data': {
+                    'id': $('#id').val(),
+                },
+                'dataType': 'json'
+            })
+            .done(function(response){
+                console.log(response);
+                $('.requested').empty();
+                $('.requested').prepend('<h2>申請済み</h2>');
+                if (response['tutor_name'] != null){
+                    $('.requested').append(`<p>先生名: ${response.tutor_name} に申請中です</p>`);
+                } else {
+                    $('.requested').append('<p>申請に失敗しました</p>');
+                }
+            });
+        });
+        $(document).ready(function() {
+            console.log('ready');
+            $.ajax({
+                'url': "{% url 'app:ajax_get_requested'  %}",
+                'type': 'POST',
+                'data': {
+
+                },
+                'dataType': 'json'
+            })
+            .done(function(response){
+                console.log(response);
+                $('.requested').empty();
+                $('.requested').prepend('<h2>申請済み</h2>');
+                if (response['tutor_name'] != null){
+                    $('.requested').append(`<p>先生名: ${response.tutor_name} に申請中です</p>`);
+                } else {
+                    $('.requested').append('<p>申請されていません</p>');
+                }
+            });
+        });
+    </script>
+
+
+</body>
+{% endblock %}

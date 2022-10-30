@@ -1,0 +1,133 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}カレンダー{% endblock %}
+{% block extra_head %}
+{% load django_bootstrap5 %}
+<!-- {% bootstrap_css %} -->
+  <meta charset='utf-8' />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <style>
+    /* .button01{
+    } */
+    .button01{
+        justify-content: center;
+        align-items: center;
+        align-content: center;
+        display:flex;
+        width:4%;
+        height:4%;
+    }
+    .button01  a{
+        border-width:10%;
+        border-color:rgb(148, 146, 146);
+        border-style:solid;border-radius:10%;
+        background-color:rgb(148, 146, 146);
+        color:antiquewhite;
+        filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.6));
+    }
+    .container{
+        flex-direction: row;
+        display: flex;
+    }
+    /* .container p{
+        font-weight: bold;
+    } */
+
+  </style>
+{% endblock %}
+{% block content %}
+<body style="padding:30px;padding-top:7%;">
+  <div class="container">
+    <p>ユーザー削除：</p>
+    <div class="button01">
+        <a id="delete">削除</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;       
+        }
+
+        var csrftoken = getCookie('csrftoken');
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+                $(document).ready(function() {
+                    $("#delete").on('click', function(){
+                    Swal.fire({
+                        title: '削除確認',
+                        text: "削除してもよいですか？",
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: '削除',
+                        cancelButtonText: 'キャンセル',  
+                        }).then((result) => {
+                        if (result.value) {
+                            $.ajax({
+                                url: "{% url 'app:ajax_user_delete' %}",
+                                type: "POST",
+                                data: {
+                                    'user_id': "{{user.id}}",
+                                },
+                                success: function (data) {
+                                    Swal.fire({
+                                        title: '削除完了',
+                                        text: "削除しました",
+                                        type: 'success',
+                                        confirmButtonText: 'OK',
+                                        }).then((result) => {
+                                    })
+                                },
+                                error: function (data) {
+                                    Swal.fire({
+                                        title: '削除失敗',
+                                        text: "削除に失敗しました",
+                                        type: 'error',
+                                        confirmButtonText: 'OK',
+                                        }).then((result) => {
+                                    })
+                                }
+                            });
+                        }else{
+                            Swal.fire({
+                                title: '削除失敗',
+                                text: "削除に失敗しました",
+                                type: 'error',
+                                confirmButtonText: 'OK',
+                                }).then((result) => {
+                            })
+                        }
+                        });
+                    });
+                });
+    </script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</body>
+{% endblock %}

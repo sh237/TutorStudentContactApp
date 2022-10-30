@@ -1,0 +1,156 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}生徒一覧{% endblock %}
+{% block extra_head %}
+  <meta charset='utf-8' />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <style>
+    .container {
+      padding: 30px;
+    }
+    .table {
+      width: 100%;
+    }
+    .table td {
+      text-align: center;
+    }
+    .table th {
+      text-align: center;
+    }
+    .table td a {
+      text-decoration: none;
+    }
+    .table td a:hover {
+      text-decoration: underline;
+    }
+    .table td a:active {
+      text-decoration: underline;
+    }
+    .table td a:visited {
+      text-decoration: underline;
+    }
+    .table td a:link {
+      text-decoration: underline;
+    }
+    .card-body a{
+        border-width:10%;
+        border-color:rgb(148, 146, 146);
+        border-style:solid;border-radius:10%;
+        background-color:rgb(148, 146, 146);
+        color:antiquewhite;
+        filter: drop-shadow(3px 3px 3px rgba(0,0,0,0.6));
+    }
+  </style>
+{% endblock %}
+{% block content %}
+<body style="padding:30px;padding-top:7%;">
+  {% if user.is_teacher %}
+    <h1>先生名:{{user.username}}</h1>
+  {% else%}
+    <h1>生徒名:{{user.username}}</h1>
+  {% endif %}
+  <div class="container">
+    <h2>生徒の一覧</h2>
+    {% for student in student_list %}
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{student.0}}</h5>
+          <p class="card-text">氏名:{{student.1}}{{student.2}}</p>
+          <a href="{% url 'app:tutor_calendar' student.3 %}" >カレンダーへ</a>
+        </div>
+      </div>
+    {% endfor %}
+
+    <div class="application">
+        <h2>承認依頼の一覧</h2>
+        {% for application in application_list %}
+        <div class="card">
+            <div class="card-body">
+            <h5 class="card-title">{{application.0}}</h5>
+            <p class="card-text">氏名{{application.1}}{{application.2}}</p>
+            <button class="{{application.3}}" id="approve">承認</button>
+            <button class="{{application.3}}" id="rejection">拒否</button>
+        </div>
+    {% endfor %}
+    </div>
+            
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;       
+        }
+
+        var csrftoken = getCookie('csrftoken');
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        $('.application').on('click', 'button', function(e) {
+            var id_ = $(this).attr('class');
+            var status = $(this).attr('id');
+            console.log(status);
+            console.log(id_);
+            if (status == 'approve') {
+                $.ajax({
+                    'url': "{% url 'app:approve' %}",
+                    'type': 'POST',
+                    'data': {
+                        'student_id':id_,
+                    },
+                    'dataType': 'json'
+                })
+                .done(function(response){
+                    if(response['result'] == 'success'){
+                        alert('承認しました');
+                        location.reload();
+                    }
+                });
+            } else {
+                $.ajax({
+                    'url': "{% url 'app:rejection' %}",
+                    'type': 'POST',
+                    'data': {
+                        'student_id':id_,
+                    },
+                    'dataType': 'json'
+                })
+                .done(function(response){
+                    if(response['result'] == 'success'){
+                        alert('拒否しました');
+                        location.reload();
+                    }
+                });
+            }
+        });
+
+
+</script>
+
+
+</body>
+{% endblock %}

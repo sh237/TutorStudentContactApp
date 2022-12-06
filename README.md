@@ -6,7 +6,9 @@
 
 TutorStudentContactApp can be initiated by a student and a teacher each registering a new student and teacher and following each other.
 
-https://user-images.githubusercontent.com/78858054/205962357-ec2dc6d4-e87a-4845-a1d1-eadab4056df8.mov
+
+https://user-images.githubusercontent.com/78858054/205972895-4cda7ef2-a562-44a2-b8a9-8bf73c5ab4c7.mov
+
 
 Once the student and teacher are linked, they can view and edit the appointments shared between them on the calendar.
 
